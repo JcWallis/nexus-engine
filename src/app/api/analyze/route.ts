@@ -39,20 +39,20 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Both topics are required" }, { status: 400 });
   }
 
-  const model = genai.getGenerativeModel({
-    model: "gemini-1.5-flash",
-    systemInstruction: SYSTEM_PROMPT,
-  });
-
-  const result = await model.generateContent(
-    `Topic A: ${topicA.trim()}\nTopic B: ${topicB.trim()}\n\nFind the deepest real-world connection between these two topics.`
-  );
-
-  const text = result.response.text().replace(/```json|```/g, "").trim();
-
   try {
+    const model = genai.getGenerativeModel({
+      model: "gemini-1.5-flash",
+      systemInstruction: SYSTEM_PROMPT,
+    });
+
+    const result = await model.generateContent(
+      `Topic A: ${topicA.trim()}\nTopic B: ${topicB.trim()}\n\nFind the deepest real-world connection between these two topics.`
+    );
+
+    const text = result.response.text().replace(/```json|```/g, "").trim();
     return NextResponse.json(JSON.parse(text));
-  } catch {
-    return NextResponse.json({ error: "Failed to parse response" }, { status: 500 });
+  } catch (e) {
+    const message = e instanceof Error ? e.message : "Unknown error";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

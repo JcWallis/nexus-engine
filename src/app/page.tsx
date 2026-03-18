@@ -48,7 +48,7 @@ export default function NexusEngine() {
       if (data.error) throw new Error(data.error);
       setResult(data);
     } catch (e) {
-      setError("Analysis failed — check that your API key is set.");
+      setError(e instanceof Error ? e.message : "Analysis failed.");
       console.error(e);
     } finally {
       setLoading(false);
