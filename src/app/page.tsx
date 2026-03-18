@@ -62,7 +62,7 @@ export default function NexusEngine() {
       <div style={styles.header}>
         <span style={styles.logo}>⬡</span>
         <span style={styles.title}>NEXUS ENGINE</span>
-        <span style={styles.sub}>Connection Research Machine</span>
+        <span style={styles.sub}>Social Trends Research Machine</span>
       </div>
 
       <div style={styles.inputRow}>
