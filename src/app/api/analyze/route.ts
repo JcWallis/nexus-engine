@@ -24,6 +24,15 @@ Score guide:
 Be specific. Cite real events, data, or mechanisms. No vague hand-waving.`;
 
 export async function POST(req: NextRequest) {
+  if (!process.env.GEMINI_API_KEY) {
+    return NextResponse.json({ error: "GEMINI_API_KEY is not set in .env" }, { status: 500 });
+  }
+
+  const cookie = req.cookies.get("nexus_auth")?.value;
+  if (cookie !== process.env.SITE_PASSWORD) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const { topicA, topicB } = await req.json();
 
   if (!topicA?.trim() || !topicB?.trim()) {
