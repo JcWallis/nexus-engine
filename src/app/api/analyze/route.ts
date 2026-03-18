@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const genai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
 const SYSTEM_PROMPT = `You are a Connection Research Engine. Given two topics, find the hidden, non-obvious real-world connections between them. Focus on causal chains, economic ripple effects, sociological links, and butterfly-effect style relationships.
 
@@ -30,23 +30,19 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Both topics are required" }, { status: 400 });
   }
 
-  const message = await client.messages.create({
-    model: "claude-sonnet-4-6",
-    max_tokens: 1000,
-    system: SYSTEM_PROMPT,
-    messages: [
-      {
-        role: "user",
-        content: `Topic A: ${topicA.trim()}\nTopic B: ${topicB.trim()}\n\nFind the deepest real-world connection between these two topics.`,
-      },
-    ],
+  const model = genai.getGenerativeModel({
+    model: "gemini-1.5-flash",
+    systemInstruction: SYSTEM_PROMPT,
   });
 
-  const text = message.content.map((b) => (b.type === "text" ? b.text : "")).join("");
-  const cleaned = text.replace(/```json|```/g, "").trim();
+  const result = await model.generateContent(
+    `Topic A: ${topicA.trim()}\nTopic B: ${topicB.trim()}\n\nFind the deepest real-world connection between these two topics.`
+  );
+
+  const text = result.response.text().replace(/```json|```/g, "").trim();
 
   try {
-    return NextResponse.json(JSON.parse(cleaned));
+    return NextResponse.json(JSON.parse(text));
   } catch {
     return NextResponse.json({ error: "Failed to parse response" }, { status: 500 });
   }
